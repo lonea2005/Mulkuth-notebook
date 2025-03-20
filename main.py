@@ -1,8 +1,9 @@
 from datetime import date
 import random
 import pickle
+import time
 
-TEST_OFFSET = 0
+TEST_OFFSET = 3
 DATE = date.today()
 DATE_STRING = DATE.strftime("%Y-%m-%d-%A")
 DATE_int = int(DATE.strftime("%Y%m%d"))
@@ -213,6 +214,9 @@ class Mulkuth_weekly():
         print("Independent PE-box: ", self.qliphoth.independent_PE_box)
         print("=====================================")
 
+        if self.weekly_energy >= 1 and self.weekly_energy_dream >= 1:
+            self.pe_transform()
+
         if mulkuth_daily.day_of_week == 7:
             #print the result
             self.qliphoth.judgement(self)
@@ -222,6 +226,29 @@ class Mulkuth_weekly():
 
         self.qliphoth.date = DATE_int
 
+    def pe_transform(self):
+        #allow daily gamble(X to turn 1 of each energy in to independent PE-box
+        print("PE transform")
+        trans = input("Do you want to transform 1 of each energy to independent PE-box? (y/n)")
+        if trans == "y":
+            self.weekly_energy -= 1
+            self.weekly_energy_dream -= 1
+            #2% chance of success
+            for i in range(2):
+
+                time.sleep(3)
+                success = random.randint(1,100)
+                if success <= 2:
+                    #sleep for 3 seconds  
+
+                    self.qliphoth.independent_PE_box += 1
+                    
+                    print("Transform success!!!")
+                else:
+                    print("Transform failed!!!")
+            time.sleep(2)
+        else:
+            print("\n")
         
 
 class Qliphoth():
@@ -258,6 +285,7 @@ class Qliphoth():
             else:
                 self.independent_PE_box += 1
                 week_energy -= 10
+                print("you crafted 1 independent PE-box from energy")
 
         while week_energy_dream >= 25:
             if self.burn_out > 0:
@@ -266,6 +294,7 @@ class Qliphoth():
             else:
                 self.independent_PE_box += 1
                 week_energy_dream -= 25
+                print("you crafted 1 independent PE-box from dream energy")
 
         print("Judgement")
         print("Full attendance: ", mulkuth_weekly.full_attendance)
@@ -274,9 +303,30 @@ class Qliphoth():
         print("=====================================")
         if self.burn_out == 5:
             print("You failed your promise.")
+
+        if self.burn_out >= 1:
+            print("Burn out should be resolved before crafting EGO")
+        elif self.independent_PE_box >= 10:
+            print("You have enough independent PE-box to craft EGO")
+            craft = input("Do you want to craft EGO? (y/n)")
+            if craft == "y":
+                self.EGO_crafting()
+            else:
+                print("\n")
+        else:
+            print("You need more independent PE-box to craft EGO")
+        print("=====================================")
+
+        #save a copy of this week
+        self.save_copy()
         
     def save(self):
         with open('Qliphoth.pickle', 'wb') as f:
+            pickle.dump(self, f)
+
+    def save_copy(self):
+        #save every week judgement in case of file corruption or new update
+        with open('Qliphoth_copy.pickle', 'wb') as f:
             pickle.dump(self, f)
 
     def load(self,dummy):
@@ -289,6 +339,8 @@ class Qliphoth():
 
 
     def EGO_crafting(self):
+        print("***EGO crafting***")
+        time.sleep(3)
         self.independent_PE_box -= 10
         EGO = random.randint(1,100)
         if EGO <= 50 and len(self.ZAYIN) > 0:
@@ -301,9 +353,14 @@ class Qliphoth():
             self.EGO.append(self.WAW.pop(random.randint(0,len(self.WAW)-1)))
         elif EGO <= 99 and len(self.ALEPH) > 0:
             self.independent_PE_box += 11
+            print("you crafted 11 independent PE-box")
+            return
         else:
             self.EGO.append(self.ALEPH.pop(random.randint(0,len(self.ALEPH)-1)))
 
+        print("EGO crafting result: ", self.EGO[-1])
+        time.sleep(2)
+        return
 
 def run():
     qliphoth = Qliphoth()
